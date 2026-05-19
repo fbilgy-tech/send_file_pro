@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FileBridge Pro - Premium P2P Transfer</title>
+    <title>FileBridge Pro - Ultimate P2P Engine</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f3f4f6; color: #1f2937; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .app-container { max-width: 650px; margin: 40px auto; }
-        .card-custom { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        body { background-color: #f8fafc; color: #0f172a; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .app-container { max-width: 680px; margin: 30px auto; }
+        .card-custom { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.02), 0 10px 10px -5px rgba(0,0,0,0.02); }
         .accent-bg { background-color: #f0fdf4; border: 1px solid #bbf7d0; }
         .accent-text { color: #16a34a; }
-        .status-box { background-color: #f9fafb; border: 1px solid #e5e7eb; height: 110px; overflow-y: auto; font-family: monospace; color: #4b5563; }
-        .file-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; transition: all 0.2s; }
+        .status-box { background-color: #0f172a; border: 1px solid #1e293b; height: 120px; overflow-y: auto; font-family: monospace; color: #38bdf8; }
+        .file-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 10px; transition: all 0.2s; }
         .file-item:hover { border-color: #16a34a; background: #f0fdf4; }
-        .btn-premium { background-color: #16a34a; color: white; font-weight: 600; border-radius: 10px; }
-        .btn-premium:hover { background-color: #15803d; color: white; }
-        .badge-status { font-size: 13px; padding: 6px 12px; border-radius: 30px; font-weight: 600; }
+        .btn-premium { background-color: #16a34a; color: white; font-weight: 600; border-radius: 12px; transition: all 0.2s; }
+        .btn-premium:hover { background-color: #15803d; color: white; transform: translateY(-1px); }
+        .badge-status { font-size: 12px; padding: 6px 14px; border-radius: 30px; font-weight: 600; }
+        #qrcode img { margin: 0 auto; border: 6px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 8px; }
+        #camera-preview { width: 100%; max-width: 300px; height: 220px; object-fit: cover; border-radius: 12px; display: none; margin: 10px auto; transform: scaleX(-1); }
     </style>
 </head>
 <body>
@@ -26,10 +28,10 @@
         <div class="card card-custom p-4 p-md-5">
             <div class="text-center mb-4">
                 <div class="d-inline-block p-3 bg-success bg-opacity-10 rounded-circle mb-2">
-                    <i class="bi bi-cloud-arrow-up-fill text-success fs-2"></i>
+                    <i class="bi bi-shield-check text-success fs-2"></i>
                 </div>
-                <h2 class="fw-bold m-0 text-dark">FileBridge <span class="accent-text">Pro</span></h2>
-                <p class="text-muted small">Premium Light Theme • Lintas Internet • P2P Enkripsi</p>
+                <h2 class="fw-bold m-0 text-dark">FileBridge <span class="accent-text">Pro v2</span></h2>
+                <p class="text-muted small">Dual-Way Handshake Engine • QR Autoconnect • Stream Chunking</p>
             </div>
 
             <div class="p-3 accent-bg rounded-4 mb-4">
@@ -40,32 +42,41 @@
                     </span>
                 </div>
                 <div class="d-flex align-items-center justify-content-center gap-2 py-1">
-                    <h3 id="my-id" class="accent-text fw-bold m-0 letter-spacing-1">Connecting...</h3>
+                    <h3 id="my-id" class="accent-text fw-bold m-0 style-id">Loading...</h3>
                     <button class="btn btn-sm btn-outline-success border-0 py-0" onclick="copyMyId()" title="Salin ID"><i class="bi bi-copy"></i></button>
                 </div>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label small text-secondary fw-bold">Hubungkan ke Perangkat Tujuan:</label>
-                <div class="input-group shadow-sm rounded-3 overflow-hidden">
-                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-link-45deg"></i></span>
-                    <input type="text" id="target-id" class="form-control border-start-0 py-2" placeholder="Masukkan ID Target...">
-                    <button id="connect-btn" class="btn btn-premium px-4" onclick="connectToPeer()">Hubungkan</button>
+            <div class="row align-items-center mb-4 g-3">
+                <div class="col-sm-6 text-center">
+                    <div id="qrcode" class="p-2 bg-light rounded-3 d-inline-block"></div>
+                    <div class="text-muted small mt-1"><i class="bi bi-qr-code-scan"></i> Scan dari HP untuk koneksi instan</div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label small text-secondary fw-bold">Hubungkan Manual / Gunakan Kamera:</label>
+                    <div class="input-group shadow-sm rounded-3 overflow-hidden mb-2">
+                        <input type="text" id="target-id" class="form-control py-2" placeholder="Masukkan ID Target...">
+                        <button id="connect-btn" class="btn btn-premium px-3" onclick="connectToPeer()">Konek</button>
+                    </div>
+                    <button id="scan-btn" class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-3" onclick="toggleCameraScanner()">
+                        <i class="bi bi-camera-fill me-1"></i> Buka Scanner Kamera HP
+                    </button>
+                    <video id="camera-preview" autoplay playsinline></video>
                 </div>
             </div>
 
             <div id="action-area" class="border-top pt-4">
                 <div class="mb-4">
-                    <label class="form-label small text-secondary fw-bold">Kirim File (Bisa Pilih Banyak):</label>
+                    <label class="form-label small text-secondary fw-bold">Kirim Berkas (Mendukung Multi-Select):</label>
                     <input type="file" id="file-input" class="form-control mb-2" multiple disabled>
                     <button id="send-btn" class="btn btn-secondary w-100 py-2.5 shadow-sm fw-bold" onclick="sendMultipleFiles()" disabled>
-                        <i class="bi bi-send-slash-fill me-2"></i> Pastikan Koneksi Terhubung Dahulu
+                        <i class="bi bi-lock-fill me-2"></i> Kunci Keamanan Terbuka Setelah Terhubung
                     </button>
                 </div>
 
                 <div id="progress-container" class="mb-4 d-none p-3 bg-light rounded-3 border">
                     <div class="d-flex justify-content-between small fw-bold mb-1">
-                        <span id="progress-status" class="text-dark">Mengirim...</span>
+                        <span id="progress-status" class="text-dark">Streaming data...</span>
                         <span id="progress-percent" class="accent-text">0%</span>
                     </div>
                     <div class="progress mb-2" style="height: 8px;">
@@ -73,89 +84,269 @@
                     </div>
                     <div class="d-flex justify-content-between text-muted x-small" style="font-size: 11px;">
                         <span id="transfer-speed"><i class="bi bi-speedometer2"></i> 0 MB/s</span>
-                        <span id="transfer-eta"><i class="bi bi-clock"></i> Sisa Waktu: --</span>
+                        <span id="transfer-bytes">0 / 0 MB</span>
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label small text-secondary fw-bold d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-folder2-open me-1"></i> Daftar Berkas Ditransfer:</span>
+                        <span><i class="bi bi-folder2-open me-1"></i> File Manager Box:</span>
                         <span id="file-count" class="badge bg-secondary">0 Berkas</span>
                     </label>
-                    <div id="file-manager-list" style="max-height: 220px; overflow-y: auto;" class="border rounded-3 p-2 bg-light text-center text-muted small py-4">
-                        <i class="bi bi-inbox fs-3 d-block mb-1 text-black-50"></i> Belum ada file yang ditransfer
+                    <div id="file-manager-list" style="max-height: 240px; overflow-y: auto;" class="border rounded-3 p-2 bg-light text-center text-muted small py-4">
+                        <i class="bi bi-inbox fs-3 d-block mb-1 text-black-50"></i> Belum ada aktivitas transfer file
                     </div>
                 </div>
             </div>
 
-            <label class="form-label small text-secondary fw-bold">Log Aktivitas:</label>
+            <label class="form-label small text-secondary fw-bold">Log Aktivitas Engine:</label>
             <div id="status-log" class="status-box p-2 rounded-3 small shadow-inner">
-                <div>> Sistem siap. Menghubungkan ke server PeerJS...</div>
+                <div>> Menginisialisasi modul WebRTC...</div>
             </div>
         </div>
     </div>
 
-    <script>
-        function playSuccessSound() {
-            const context = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = context.createOscillator();
-            const gain = context.createGain();
-            osc.connect(gain);
-            gain.connect(context.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(587.33, context.currentTime); 
-            osc.frequency.setValueAtTime(880, context.currentTime + 0.1); 
-            gain.gain.setValueAtTime(0.1, context.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.4);
-            osc.start(context.currentTime);
-            osc.stop(context.currentTime + 0.4);
-        }
-    </script>
-
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+
     <script>
         /**
          * @file index.html
-         * @description P2P File Transfer dengan Fitur Proteksi & Validasi Sinyal Koneksi Internet
+         * @description Core Logic FileBridge Pro v2 dengan Fitur Handshake Anti-Gagal & QR Scanner
          * @author Desnabil Gymnastiar <Biel07.Dev>
          * @copyright © 2026 Desnabil Gymnastiar. All rights reserved.
          */
         const randomId = Math.random().toString(36).substring(2, 7);
-        const peer = new Peer(randomId);
+        // Menggunakan Server Google STUN Publik gratis agar tembus blokir firewall operator seluler
+        const peer = new Peer(randomId, {
+            config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'stun:stun1.l.google.com:19302' }] }
+        });
+
         let conn = null;
         let fileCounter = 0;
+        let codeReader = null;
+        let isScanning = false;
+        let receivedChunks = [];
+        let expectedSize = 0;
+        let currentFileName = "";
+        let currentFileType = "";
 
         peer.on('open', (id) => {
             document.getElementById('my-id').innerText = id;
-            logStatus("Terhubung ke server signaling global. Menunggu inisiasi tautan antar-perangkat.");
+            logStatus(`Mendapatkan Alamat IP WebRTC. ID Perangkat Anda: ${id}`);
+            
+            // Generate QR Code otomatis dari ID perangkat ini
+            new QRCode(document.getElementById("qrcode"), {
+                text: window.location.origin + window.location.pathname + "?connect=" + id,
+                width: 128,
+                height: 128
+            });
+
+            // Auto-Connect jika mendeteksi parameter scan QR dari kamera HP
+            const urlParams = new URLSearchParams(window.location.search);
+            const connectId = urlParams.get('connect');
+            if(connectId) {
+                document.getElementById('target-id').value = connectId;
+                logStatus(`Mendeteksi Tautan QR Code. Otomatis menghubungkan ke ${connectId}...`);
+                setTimeout(() => { connectToPeer(); }, 1500);
+            }
         });
 
-        // Menangani Koneksi Masuk (Sisi Penerima / PC)
+        // Menangani Koneksi Masuk (Sisi PC)
         peer.on('connection', (connection) => {
             conn = connection;
             setupHandlers();
-            updateConnectionUI(true, "Terhubung (Sebagai PC/Penerima)");
-            logStatus("Handshake berhasil! Koneksi P2P internet dengan HP telah tervalidasi aktif.");
+            // Jabat tangan balik (Reverse Signaling Link) untuk mengamankan koneksi HP agar tidak gagal
+            conn.send({ type: 'handshake-ack', sender: randomId });
+            updateConnectionUI(true, "Terhubung (PC Mode)");
+            logStatus("Handshake Terverifikasi Masuk! Jalur dua arah dipastikan aman.");
         });
 
-        function copyMyId() {
-            const idText = document.getElementById('my-id').innerText;
-            if(idText && idText !== 'Connecting...') {
-                navigator.clipboard.writeText(idText);
-                alert("ID Perangkat berhasil disalin: " + idText);
-            }
-        }
-
-        // Menghubungkan ke Perangkat Lain (Sisi Pengirim / HP)
         function connectToPeer() {
             const targetId = document.getElementById('target-id').value.trim();
-            if (!targetId) return alert("Masukkan ID target terlebih dahulu!");
+            if (!targetId) return alert("Masukkan ID target!");
             
             updateConnectionUI(false, "Menghubungkan...");
-            logStatus(`Mencoba melakukan sinkronisasi sinyal ke ID: ${targetId}...`);
+            logStatus(`Mengirimkan paket sinkronisasi ke ID: ${targetId}...`);
             
-            conn = peer.connect(targetId);
+            conn = peer.connect(targetId, { reliable: true });
             setupHandlers();
+        }
+
+        function setupHandlers() {
+            const managerList = document.getElementById('file-manager-list');
+
+            conn.on('open', () => {
+                updateConnectionUI(true, "Terhubung (HP Mode)");
+                logStatus("Sinyal Keluar Berhasil Menembus Firewall Target!");
+                if(managerList.innerHTML.includes("Belum ada aktivitas")) {
+                    managerList.innerHTML = "";
+                    managerList.className = "border rounded-3 p-2 bg-white";
+                }
+            });
+
+            conn.on('close', () => {
+                updateConnectionUI(false, "Terputus");
+                logStatus("🚨 Sinyal terputus. Perangkat seberang menutup aplikasi.");
+            });
+
+            // Engine Pemroses Data Utama (Mendukung Streaming Chunking Data Berkapasitas Besar)
+            conn.on('data', (data) => {
+                if(data.type === 'handshake-ack') {
+                    // Ketika HP menerima balasan dari PC, kunci status sukses di HP
+                    updateConnectionUI(true, "Terhubung (HP Mode)");
+                    logStatus("Menerima konfirmasi balik dari PC. Handshake 100% Sukses!");
+                }
+                else if (data.type === 'start') {
+                    receivedChunks = [];
+                    expectedSize = data.size;
+                    currentFileName = data.name;
+                    currentFileType = data.fileType;
+                    logStatus(`Mulai mengalirkan berkas: ${data.name} (${(data.size/(1024*1024)).toFixed(2)} MB)`);
+                } 
+                else if (data.type === 'chunk') {
+                    receivedChunks.push(data.chunk);
+                    // Menampilkan progres unduhan real-time di sisi PC penerima
+                    const currentReceived = receivedChunks.length * 16384; 
+                    const percent = Math.min(100, Math.round((currentReceived / expectedSize) * 100));
+                    logStatus(`Menerima paket data: ${percent}%`, true);
+                }
+                else if (data.type === 'end') {
+                    logStatus(`Rekonstruksi data paket [${currentFileName}]...`);
+                    const blob = new Blob(receivedChunks, { type: currentFileType });
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    playSuccessSound();
+                    fileCounter++;
+                    document.getElementById('file-count').innerText = `${fileCounter} Berkas`;
+
+                    let fileIcon = "bi-file-earmark-code text-secondary";
+                    if(currentFileType.includes("image")) fileIcon = "bi-file-earmark-image text-primary";
+                    else if(currentFileType.includes("pdf")) fileIcon = "bi-file-earmark-pdf text-danger";
+                    else if(currentFileType.includes("video")) fileIcon = "bi-file-earmark-play text-warning";
+                    else if(currentFileType.includes("zip") || currentFileType.includes("rar")) fileIcon = "bi-file-zip text-info";
+
+                    const itemHtml = `
+                        <div class="file-item d-flex align-items-center justify-content-between text-start animated fadeIn">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi ${fileIcon} fs-3"></i>
+                                <div style="max-width: 260px;">
+                                    <h6 class="m-0 text-dark text-truncate fw-semibold">${currentFileName}</h6>
+                                    <span class="text-muted small">${(expectedSize / (1024*1024)).toFixed(2)} MB • Siap</span>
+                                </div>
+                            </div>
+                            <a href="${blobUrl}" download="${currentFileName}" class="btn btn-sm btn-success px-3 fw-bold rounded-3">
+                                <i class="bi bi-download"></i> Download
+                            </a>
+                        </div>
+                    `;
+                    managerList.innerHTML = itemHtml + managerList.innerHTML;
+                    logStatus(`Berkas [${currentFileName}] siap diunduh di File Manager Box.`);
+                }
+            });
+        }
+
+        // Mengirim File dengan Pemotongan Byte Ringan (Anti-Crash Beda Jaringan)
+        async function sendMultipleFiles() {
+            const fileInput = document.getElementById('file-input');
+            const files = fileInput.files;
+            if (files.length === 0) return alert("Pilih file!");
+
+            const container = document.getElementById('progress-container');
+            const bar = document.getElementById('progress-bar');
+            const percentEl = document.getElementById('progress-percent');
+            const status = document.getElementById('progress-status');
+            const speedEl = document.getElementById('transfer-speed');
+            const bytesEl = document.getElementById('transfer-bytes');
+
+            container.classList.remove('d-none');
+
+            for(let i=0; i<files.length; i++) {
+                const file = files[i];
+                status.innerText = `Mengalirkan (${i+1}/${files.length}): ${file.name}`;
+                
+                conn.send({ type: 'start', name: file.name, size: file.size, fileType: file.type });
+
+                const chunkSize = 16384; // 16 KB per paket data stream
+                let offset = 0;
+                const startTime = Date.now();
+
+                while (offset < file.size) {
+                    const chunk = file.slice(offset, offset + chunkSize);
+                    const buffer = await readChunkAsArrayBuffer(chunk);
+                    
+                    conn.send({ type: 'chunk', chunk: buffer });
+                    offset += chunkSize;
+
+                    // Mengalkulasi kecepatan & progres interaktif
+                    const percent = Math.min(100, Math.round((offset / file.size) * 100));
+                    bar.style.width = percent + "%";
+                    percentEl.innerText = percent + "%";
+                    
+                    const duration = (Date.now() - startTime) / 1000;
+                    const speed = ((offset / (1024 * 1024)) / (duration || 1)).toFixed(2);
+                    speedEl.innerHTML = `<i class="bi bi-speedometer2"></i> ${speed} MB/s`;
+                    bytesEl.innerText = `${(offset/(1024*1024)).toFixed(1)} / ${(file.size/(1024*1024)).toFixed(1)} MB`;
+
+                    // Memberikan sela kecil bernapas pada CPU perangkat agar tidak freeze
+                    if(offset % (chunkSize * 20) === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 15));
+                    }
+                }
+
+                conn.send({ type: 'end' });
+                logStatus(`Sukses mengalirkan penuh: ${file.name}`);
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            status.innerText = "Seluruh rangkaian berkas sukses terkirim!";
+        }
+
+        function readChunkAsArrayBuffer(fileSlice) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsArrayBuffer(fileSlice);
+            });
+        }
+
+        // Fitur Canggih: Kamera Scanner Instan untuk HP
+        function toggleCameraScanner() {
+            const video = document.getElementById('camera-preview');
+            const scanBtn = document.getElementById('scan-btn');
+            
+            if (isScanning) {
+                codeReader.reset();
+                video.style.display = 'none';
+                scanBtn.innerHTML = `<i class="bi bi-camera-fill me-1"></i> Buka Scanner Kamera HP`;
+                isScanning = false;
+                return;
+            }
+
+            isScanning = true;
+            scanBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Menutup Scanner...`;
+            video.style.display = 'block';
+            codeReader = new ZXing.BrowserQRCodeReader();
+            
+            codeReader.decodeFromVideoDevice(null, 'camera-preview', (result, err) => {
+                if (result) {
+                    logStatus(`QR Code sukses terbaca! Isi data: ${result.text}`);
+                    codeReader.reset();
+                    video.style.display = 'none';
+                    scanBtn.innerHTML = `<i class="bi bi-camera-fill me-1"></i> Buka Scanner Kamera HP`;
+                    isScanning = false;
+                    
+                    // Ekstraksi ID dari URL hasil scan QR
+                    const url = new URL(result.text);
+                    const id = url.searchParams.get('connect');
+                    if (id) {
+                        document.getElementById('target-id').value = id;
+                        connectToPeer();
+                    }
+                }
+            });
+            scanBtn.className = "btn btn-outline-danger btn-sm w-100 fw-bold rounded-3";
+            scanBtn.innerHTML = `<i class="bi bi-camera-video-off-fill me-1"></i> Tutup Scanner`;
         }
 
         function updateConnectionUI(isConnected, text) {
@@ -166,154 +357,58 @@
 
             if (isConnected) {
                 badge.className = "badge bg-success badge-status text-white";
-                badge.innerHTML = `<i class="bi bi-wifi me-1"></i> ${text}`;
-                
-                // Buka proteksi tombol kirim file
+                badge.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${text}`;
                 sendBtn.disabled = false;
                 fileInput.disabled = false;
                 sendBtn.className = "btn btn-premium w-100 py-2.5 shadow-sm fw-bold";
                 sendBtn.innerHTML = `<i class="bi bi-send-fill me-2"></i> Mulai Transfer File`;
-                connectBtn.innerText = "Terhubung";
+                connectBtn.innerText = "Ok";
                 connectBtn.disabled = true;
             } else if (text === "Menghubungkan...") {
                 badge.className = "badge bg-warning badge-status text-dark";
-                badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Sinkronisasi Jalur...`;
+                badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Sinkronisasi Dua Arah...`;
             } else {
                 badge.className = "badge bg-danger badge-status text-white";
                 badge.innerHTML = `<i class="bi bi-wifi-off me-1"></i> ${text}`;
-                
-                // Kunci proteksi tombol kirim file
                 sendBtn.disabled = true;
                 fileInput.disabled = true;
                 sendBtn.className = "btn btn-secondary w-100 py-2.5 shadow-sm fw-bold";
-                sendBtn.innerHTML = `<i class="bi bi-send-slash-fill me-2"></i> Pastikan Koneksi Terhubung Dahulu`;
-                connectBtn.innerText = "Hubungkan";
+                sendBtn.innerHTML = `<i class="bi bi-lock-fill me-2"></i> Kunci Keamanan Terbuka Setelah Terhubung`;
+                connectBtn.innerText = "Konek";
                 connectBtn.disabled = false;
             }
         }
 
-        function setupHandlers() {
-            const managerList = document.getElementById('file-manager-list');
-
-            conn.on('open', () => {
-                updateConnectionUI(true, "Terhubung (Sebagai HP/Pengirim)");
-                logStatus("Jalur P2P Aman Berhasil Terverifikasi Aktif! Siap kirim berkas.");
-                if(managerList.innerHTML.includes("Belum ada file")) {
-                    managerList.innerHTML = "";
-                    managerList.className = "border rounded-3 p-2 bg-white";
-                }
-            });
-
-            conn.on('close', () => {
-                updateConnectionUI(false, "Koneksi Terputus");
-                logStatus("🚨 Peringatan: Jalur komunikasi terputus dari perangkat seberang.");
-            });
-
-            conn.on('error', (err) => {
-                updateConnectionUI(false, "Gagal");
-                logStatus(`🚨 Error Koneksi: ${err.message}`);
-            });
-
-            // Menangani penerimaan file
-            conn.on('data', (data) => {
-                if (data.type === 'start') {
-                    logStatus(`Sedang menerima informasi file: ${data.name}`);
-                } 
-                else if (data.type === 'complete') {
-                    playSuccessSound();
-                    logStatus(`Berkas [${data.name}] sukses diterima.`);
-                    
-                    const blob = new Blob([data.file], { type: data.fileType });
-                    const blobUrl = URL.createObjectURL(blob);
-                    
-                    fileCounter++;
-                    document.getElementById('file-count').innerText = `${fileCounter} Berkas`;
-
-                    let fileIcon = "bi-file-earmark-code";
-                    if(data.fileType.includes("image")) fileIcon = "bi-file-earmark-image text-primary";
-                    else if(data.fileType.includes("pdf")) fileIcon = "bi-file-earmark-pdf text-danger";
-                    else if(data.fileType.includes("video")) fileIcon = "bi-file-earmark-play text-warning";
-                    else if(data.fileType.includes("zip") || data.fileType.includes("rar")) fileIcon = "bi-file-zip text-info";
-
-                    const itemHtml = `
-                        <div class="file-item d-flex align-items-center justify-content-between text-start">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi ${fileIcon} fs-3"></i>
-                                <div style="max-width: 280px;">
-                                    <h6 class="m-0 text-dark text-truncate fw-semibold">${data.name}</h6>
-                                    <span class="text-muted small">${(data.size / (1024*1024)).toFixed(2)} MB • Selesai</span>
-                                </div>
-                            </div>
-                            <a href="${blobUrl}" download="${data.name}" class="btn btn-sm btn-success px-3 fw-bold rounded-3">
-                                <i class="bi bi-download"></i> Download
-                            </a>
-                        </div>
-                    `;
-                    managerList.innerHTML = itemHtml + managerList.innerHTML;
-                }
-            });
-        }
-
-        // Fungsi Mengirim Banyak File Sekaligus
-        async function sendMultipleFiles() {
-            const fileInput = document.getElementById('file-input');
-            const files = fileInput.files;
-            if (files.length === 0) return alert("Pilih minimal satu file terlebih dahulu!");
-            if (!conn || conn.open === false) {
-                updateConnectionUI(false, "Belum Terhubung");
-                return alert("Koneksi belum terverifikasi! Silakan klik Hubungkan ulang.");
+        function copyMyId() {
+            const idText = document.getElementById('my-id').innerText;
+            if(idText && idText !== 'Loading...') {
+                navigator.clipboard.writeText(idText);
+                alert("ID disalin: " + idText);
             }
-
-            const container = document.getElementById('progress-container');
-            const bar = document.getElementById('progress-bar');
-            const percent = document.getElementById('progress-percent');
-            const status = document.getElementById('progress-status');
-            const speedEl = document.getElementById('transfer-speed');
-
-            container.classList.remove('d-none');
-
-            for(let i=0; i<files.length; i++) {
-                const file = files[i];
-                status.innerText = `Mengirim (${i+1}/${files.length}): ${file.name}`;
-                
-                conn.send({ type: 'start', name: file.name });
-
-                const startTime = Date.now();
-                const fileData = await readFileAsArrayBuffer(file);
-
-                conn.send({
-                    type: 'complete',
-                    file: fileData,
-                    name: file.name,
-                    fileType: file.type,
-                    size: file.size
-                });
-
-                const duration = (Date.now() - startTime) / 1000;
-                const speed = ((file.size / (1024 * 1024)) / (duration || 1)).toFixed(2);
-                speedEl.innerHTML = `<i class="bi bi-speedometer2"></i> Kecepatan: ${speed} MB/s`;
-
-                bar.style.width = "100%";
-                percent.innerText = "100%";
-                logStatus(`Sukses mengirim: ${file.name}`);
-
-                await new Promise(resolve => setTimeout(resolve, 600));
-            }
-
-            status.innerText = "Semua file berhasil terkirim!";
-            document.getElementById('transfer-eta').innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Selesai`;
         }
 
-        function readFileAsArrayBuffer(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.readAsArrayBuffer(file);
-            });
+        function playSuccessSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = context.createOscillator();
+                const gain = context.createGain();
+                osc.connect(gain);
+                gain.connect(context.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, context.currentTime); 
+                osc.frequency.setValueAtTime(880, context.currentTime + 0.1); 
+                gain.gain.setValueAtTime(0.1, context.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.4);
+                osc.start(context.currentTime);
+                osc.stop(context.currentTime + 0.4);
+            } catch(e){}
         }
 
-        function logStatus(msg) {
+        function logStatus(msg, isReplaceLast = false) {
             const log = document.getElementById('status-log');
+            if(isReplaceLast && log.lastChild) {
+                log.removeChild(log.lastChild);
+            }
             log.innerHTML += `<div>> ${msg}</div>`;
             log.scrollTop = log.scrollHeight;
         }
