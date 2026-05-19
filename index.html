@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send File Pro - Premium P2P Radar Engine</title>
+    <title>Remote Share Pro - Premium P2P Remote Desktop Engine</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         body { background-color: #f4f6f9; color: #1e293b; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .app-container { max-width: 700px; margin: 40px auto; }
+        .app-container { max-width: 800px; margin: 40px auto; }
         .card-premium { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.03), 0 10px 10px -5px rgba(0,0,0,0.02); overflow: hidden; }
-        .brand-header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-center: center; }
-        .radar-box { position: relative; width: 100px; height: 100px; margin: 0 auto; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .radar-wave { position: absolute; width: 100%; height: 100%; border: 2px solid #10b981; border-radius: 50%; opacity: 0; animation: pulse 2s infinite linear; }
+        .brand-header { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; padding: 30px; text-center: center; }
+        .radar-box { position: relative; width: 100px; height: 100px; margin: 0 auto; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .radar-wave { position: absolute; width: 100%; height: 100%; border: 2px solid #ef4444; border-radius: 50%; opacity: 0; animation: pulse 2s infinite linear; }
         .radar-wave:nth-child(2) { animation-delay: 1s; }
         @keyframes pulse { 0% { transform: scale(0.6); opacity: 0; } 50% { opacity: 0.5; } 100% { transform: scale(1.6); opacity: 0; } }
         .role-card { cursor: pointer; transition: all 0.25s ease; border: 2px solid #e2e8f0; border-radius: 16px; background: #fff; }
-        .role-card:hover { border-color: #10b981; background-color: #f0fdf4; transform: translateY(-2px); }
-        .role-active { border-color: #10b981 !important; background-color: #f0fdf4 !important; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
-        .device-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
-        .device-item:hover { border-color: #10b981; background: #fff; }
+        .role-card:hover { border-color: #ef4444; background-color: #fef2f2; transform: translateY(-2px); }
+        .role-active { border-color: #ef4444 !important; background-color: #fef2f2 !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1); }
         .status-badge { font-size: 11px; letter-spacing: 0.5px; padding: 6px 14px; border-radius: 30px; font-weight: 700; text-transform: uppercase; }
         .log-terminal { background-color: #0f172a; border: 1px solid #1e293b; height: 120px; overflow-y: auto; font-family: monospace; color: #38bdf8; font-size: 12px; border-radius: 12px; }
-        .file-card-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
-        #qrcode img { margin: 0 auto; border: 6px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 8px; }
-        #camera-preview { width: 100%; max-width: 280px; height: 200px; object-fit: cover; border-radius: 12px; display: none; margin: 10px auto; }
+        
+        /* Monitor Stream Styling */
+        .remote-monitor-wrapper { background: #000; border-radius: 16px; overflow: hidden; position: relative; border: 2px solid #1e293b; }
+        #remote-video { width: 100%; height: auto; display: block; background: #000; cursor: crosshair; }
     </style>
 </head>
 <body>
@@ -34,115 +33,101 @@
             
             <div class="brand-header text-center">
                 <div class="d-inline-block p-2 bg-white bg-opacity-20 rounded-circle mb-2">
-                    <i class="bi bi-share-fill fs-3 text-white"></i>
+                    <i class="bi bi-display fs-3 text-white"></i>
                 </div>
-                <h1 class="fw-bold m-0" style="letter-spacing: -0.5px;">Send File <span style="color: #a7f3d0;">Pro</span></h1>
-                <p class="m-0 opacity-75 small fw-semibold">Local High-Speed Radar Engine • No Bluetooth Needed</p>
+                <h1 class="fw-bold m-0" style="letter-spacing: -0.5px;">Remote Share <span style="color: #fca5a5;">Pro</span></h1>
+                <p class="m-0 opacity-75 small fw-semibold">LAN WebRTC Remote Screen Mirror Engine • AnyDesk Style</p>
             </div>
 
             <div class="p-4 p-md-5">
                 
+                <!-- View 1: Setup Mode -->
                 <div id="setup-view">
                     <h5 class="text-secondary fw-bold text-center mb-4 text-uppercase small" style="letter-spacing: 1px;">Pilih Mode Perangkat</h5>
                     <div class="row g-3 mb-4">
                         <div class="col-6">
-                            <div id="card-sender" class="role-card p-4 text-center h-100" onclick="selectRole('SENDER')">
-                                <i class="bi bi-phone-vibrate-fill fs-1 text-success d-block mb-2"></i>
-                                <span class="fw-bold d-block text-dark">📱 HP / PENGIRIM</span>
-                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Gunakan HP untuk scan QR PC & kirim file</small>
+                            <div id="card-sender" class="role-card p-4 text-center h-100" onclick="selectRole('CONTROLLER')">
+                                <i class="bi bi-phone-fill fs-1 text-danger d-block mb-2"></i>
+                                <span class="fw-bold d-block text-dark">📱 HP / PENGENDALI</span>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Kendalikan dan lihat layar PC dari HP ini</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div id="card-receiver" class="role-card p-4 text-center h-100" onclick="selectRole('RECEIVER')">
-                                <i class="bi bi-laptop-fill fs-1 text-primary d-block mb-2"></i>
-                                <span class="fw-bold d-block text-dark">💻 PC / PENERIMA</span>
-                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Gunakan PC untuk memunculkan QR Code</small>
+                            <div id="card-receiver" class="role-card p-4 text-center h-100" onclick="selectRole('HOST')">
+                                <i class="bi bi-laptop fs-1 text-dark d-block mb-2"></i>
+                                <span class="fw-bold d-block text-dark">💻 PC / TARGET HOST</span>
+                                <small class="text-muted d-block mt-1" style="font-size: 11px;">Bagikan layar PC ini untuk dikontrol perangkat lain</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- View 2: Main Dashboard -->
                 <div id="main-dashboard-view" class="d-none">
                     
                     <div class="p-3 bg-light rounded-4 mb-4 border d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="text-muted small fw-bold d-block text-uppercase" style="font-size: 10px;">Status Mesin P2P</span>
+                            <span class="text-muted small fw-bold d-block text-uppercase" style="font-size: 10px;">Status Akses P2P</span>
                             <h5 id="engine-role-title" class="fw-bold m-0 text-dark">Menginisialisasi...</h5>
                         </div>
                         <span id="status-indicator" class="badge bg-danger status-badge text-white">
-                            <i class="bi bi-bluetooth me-1"></i> Disconnected
+                            <i class="bi bi-broadcast me-1"></i> Disconnected
                         </span>
                     </div>
 
-                    <div id="panel-receiver-qr" class="text-center mb-4 d-none">
+                    <!-- Panel PC/Host: Sisi yang di-remote -->
+                    <div id="panel-host-qr" class="text-center mb-4 d-none">
                         <div class="radar-box mb-3">
                             <div class="radar-wave"></div>
                             <div class="radar-wave"></div>
-                            <i class="bi bi-broadcast fs-3 text-success"></i>
+                            <i class="bi bi-shield-lock-fill fs-3 text-danger"></i>
                         </div>
-                        <div id="qrcode" class="p-2 bg-white border rounded-3 d-inline-block mb-2"></div>
-                        <p class="text-muted small px-4"><i class="bi bi-info-circle-fill text-success"></i> Pastikan HP & PC berada di **Wi-Fi/Hotspot yang sama**. Buka Send File Pro di HP lalu scan kode di atas.</p>
+                        <div id="qrcode" class="p-2 bg-white border rounded-3 d-inline-block mb-3"></div>
+                        <div class="p-3 bg-warning bg-opacity-10 text-dark rounded-3 border text-start small mb-2">
+                            <i class="bi bi-window-video me-1 text-danger"></i> <strong>Langkah Host:</strong> Klik tombol di bawah untuk memilih monitor/aplikasi yang ingin Anda bagikan secara nirkabel.
+                        </div>
+                        <button id="start-stream-btn" class="btn btn-danger w-100 fw-bold py-2.5 rounded-3 mb-3" onclick="startScreenCapture()">
+                            <i class="bi bi-projector-fill me-2"></i> Aktifkan Sharing Layar PC
+                        </button>
                     </div>
 
-                    <div id="panel-sender-scan" class="mb-4 d-none">
-                        <label class="form-label small text-secondary fw-bold">Pindai Radar PC Tujuan:</label>
-                        <button id="camera-btn" class="btn btn-outline-success w-100 fw-bold py-2.5 rounded-3 mb-2" onclick="toggleCameraScanner()">
-                            <i class="bi bi-qr-code-scan me-2"></i> Aktifkan Scanner Kamera HP
+                    <!-- Panel HP/Controller: Sisi yang mengendalikan -->
+                    <div id="panel-controller-scan" class="mb-4 d-none">
+                        <label class="form-label small text-secondary fw-bold">Hubungkan ke PC Target:</label>
+                        <button id="camera-btn" class="btn btn-outline-danger w-100 fw-bold py-2.5 rounded-3 mb-2" onclick="toggleCameraScanner()">
+                            <i class="bi bi-qr-code-scan me-2"></i> Scan QR Code Layar PC
                         </button>
-                        <video id="camera-preview" autoplay playsinline class="border shadow-sm"></video>
+                        <video id="camera-preview" autoplay playsinline class="border shadow-sm w-100 rounded-3 mb-2" style="display:none; max-height:200px; object-fit: cover;"></video>
                         
                         <div class="input-group input-group-sm mt-3 shadow-sm rounded-3 overflow-hidden">
-                            <span class="input-group-text bg-white text-muted border-end-0">Atau Ketik ID PC:</span>
+                            <span class="input-group-text bg-white text-muted border-end-0">Atau Masukkan ID Desk:</span>
                             <input type="text" id="manual-target-id" class="form-control border-start-0" placeholder="Contoh: x2y3z">
-                            <button class="btn btn-success fw-bold" onclick="connectManual()">Connect</button>
+                            <button class="btn btn-danger fw-bold" onclick="connectToHost()">Connect</button>
                         </div>
                     </div>
 
-                    <div id="panel-transfer-actions" class="border-top pt-4">
-                        <div class="mb-4">
-                            <label class="form-label small text-secondary fw-bold">Pilih Dokumen / Media (Multi-Select):</label>
-                            <input type="file" id="file-input" class="form-control mb-2" multiple disabled>
-                            <button id="send-btn" class="btn btn-secondary w-100 py-2.5 shadow-sm fw-bold rounded-3" onclick="sendMultipleFilesPro()" disabled>
-                                <i class="bi bi-lock-fill me-2"></i> Pasangkan Perangkat Terlebih Dahulu
-                            </button>
+                    <!-- Remote Monitor Output (Hanya muncul di Controller/HP) -->
+                    <div id="panel-remote-monitor" class="mb-4 d-none">
+                        <label class="form-label small text-secondary fw-bold"><i class="bi bi-eye-fill text-danger"></i> Live Stream Desk Target:</label>
+                        <div class="remote-monitor-wrapper">
+                            <video id="remote-video" autoplay playsinline></video>
                         </div>
-
-                        <div id="progress-container" class="mb-4 d-none p-3 bg-light rounded-3 border">
-                            <div class="d-flex justify-content-between small fw-bold mb-1">
-                                <span id="progress-status" class="text-dark">Streaming paket data...</span>
-                                <span id="progress-percent" class="text-success">0%</span>
-                            </div>
-                            <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
-                                <div id="progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 0%"></div>
-                            </div>
-                            <div class="d-flex justify-content-between text-muted x-small" style="font-size: 11px;">
-                                <span id="transfer-speed"><i class="bi bi-speedometer2"></i> 0 MB/s</span>
-                                <span id="transfer-bytes">0 / 0 MB</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small text-secondary fw-bold d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-folder2-open text-success me-1"></i> File Manager Archive:</span>
-                                <span id="file-count-badge" class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1">0 Files</span>
-                            </label>
-                            <div id="file-archive-list" style="max-height: 250px; overflow-y: auto;" class="border rounded-4 p-3 bg-light text-center text-muted small py-4">
-                                <i class="bi bi-folder-symlink fs-2 d-block mb-2 text-black-50"></i> Belum ada aktivitas pengiriman berkas.
-                            </div>
-                        </div>
-
+                        <small class="text-muted d-block mt-2 text-center"><i class="bi bi-info-circle"></i> Sentuh area layar di atas untuk mengirim simulasi sinyal klik koordinat.</small>
                     </div>
+
                 </div>
 
-                <label class="form-label small text-secondary fw-bold mt-2">Log Aktivitas Core Engine:</label>
+                <!-- Log Terminal System -->
+                <label class="form-label small text-secondary fw-bold mt-2">Log Remote Engine Status:</label>
                 <div id="status-log" class="log-terminal p-2 shadow-inner">
-                    <div>> System core ready. Awaiting user device configuration...</div>
+                    <div>> System core ready. Awaiting operational role selection...</div>
                 </div>
 
             </div>
         </div>
     </div>
 
+    <!-- Script Engine Core Requirements -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/@zxing/library@latest"></script>
@@ -150,335 +135,215 @@
     <script>
         /**
          * @file index.html
-         * @description Send File Pro Core Engine - LAN P2P WebRTC Interface
-         * @author Desnabil Gymnastiar <Biel07.Dev>
-         * @copyright © 2026 Desnabil Gymnastiar. All rights reserved.
+         * @description Remote Share Pro Core Engine - LAN P2P Remote Interface Mirroring
+         * @copyright © 2026 Remote Share Pro
          */
         let currentRole = "";
         let peerInstance = null;
         let p2pConnection = null;
-        let fileCounter = 0;
+        let localScreenStream = null;
         let qrScannerReader = null;
         let isScannerActive = false;
-        
-        // Storage Buffer Streaming File
-        let receivedDataChunks = [];
-        let totalExpectedBytes = 0;
-        let activeFileName = "";
-        let activeFileType = "";
 
         function selectRole(role) {
             currentRole = role;
             document.getElementById('card-sender').classList.remove('role-active');
             document.getElementById('card-receiver').classList.remove('role-active');
             
-            if(role === 'SENDER') document.getElementById('card-sender').classList.add('role-active');
+            if(role === 'CONTROLLER') document.getElementById('card-sender').classList.add('role-active');
             else document.getElementById('card-receiver').classList.add('role-active');
 
-            // Jalankan transisi view dashboard
             setTimeout(() => {
                 document.getElementById('setup-view').classList.add('d-none');
                 document.getElementById('main-dashboard-view').classList.remove('d-none');
-                document.getElementById('engine-role-title').innerText = role === 'SENDER' ? "HP / PENGIRIM" : "PC / PENERIMA";
+                document.getElementById('engine-role-title').innerText = role === 'CONTROLLER' ? "HP / PENGENDALI" : "PC / TARGET HOST";
                 
-                if(role === 'RECEIVER') document.getElementById('panel-receiver-qr').classList.remove('d-none');
-                else document.getElementById('panel-sender-scan').classList.remove('d-none');
+                if(role === 'HOST') document.getElementById('panel-host-qr').classList.remove('d-none');
+                else document.getElementById('panel-controller-scan').classList.remove('d-none');
                 
-                initSendFileProEngine();
+                initRemoteEngine();
             }, 350);
         }
 
-        function initSendFileProEngine() {
-            const generatedRandomId = Math.random().toString(36).substring(2, 7);
+        function initRemoteEngine() {
+            const deskRandomId = Math.random().toString(36).substring(2, 7);
             
-            // Konfigurasi ICE untuk optimalisasi transfer LAN nirkabel (Tanpa butuh server internet)
-            peerInstance = new Peer(generatedRandomId, {
+            peerInstance = new Peer(deskRandomId, {
                 config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
             });
 
             peerInstance.on('open', (id) => {
-                logStatus(`Core Engine Terbuka. Alamat ID Perangkat Anda: [ ${id} ]`);
+                logStatus(`Desk ID Terbuat. Masukkan kode ini pada controller: [ ${id} ]`);
                 
-                if (currentRole === 'RECEIVER') {
-                    // Inject parameter query auto-connect ke dalam QR Code
+                if (currentRole === 'HOST') {
                     const targetLink = window.location.origin + window.location.pathname + "?pair=" + id;
                     new QRCode(document.getElementById("qrcode"), {
                         text: targetLink,
-                        width: 150,
-                        height: 150
+                        width: 140,
+                        height: 140
                     });
                 }
 
-                // Cek apakah HP membuka link hasil scan QR dari kamera bawaan OS
+                // Auto-pair handler via URL query
                 const queryParameters = new URLSearchParams(window.location.search);
                 const automaticPairId = queryParameters.get('pair');
-                if(automaticPairId && currentRole === 'SENDER') {
+                if(automaticPairId && currentRole === 'CONTROLLER') {
                     document.getElementById('manual-target-id').value = automaticPairId;
-                    logStatus(`Membaca parameter tautan QR. Melakukan otomatisasi pairing ke ${automaticPairId}...`);
-                    setTimeout(() => { connectManual(); }, 1000);
+                    logStatus(`Membaca ID dari QR otomatis. Menghubungkan ke Desk ${automaticPairId}...`);
+                    setTimeout(() => { connectToHost(); }, 1000);
                 }
             });
 
-            // Menunggu koneksi masuk (Sisi PC Penerima)
-            peerInstance.on('connection', (incomingConn) => {
-                if (currentRole === 'RECEIVER') {
-                    p2pConnection = incomingConn;
-                    bindEngineDataHandlers();
-                    syncConnectionUI(true, "Paired & Connected");
-                    logStatus("Jabat tangan berhasil! Koneksi P2P lokal dengan HP telah terkunci hijau.");
-                }
+            // Sisi PC (Host) menerima telepon video stream (Media Call)
+            peerInstance.on('connection', (incomingDataChannel) => {
+                p2pConnection = incomingDataChannel;
+                setupDataProtocol();
+            });
+
+            peerInstance.on('call', (incomingCall) => {
+                logStatus("Menerima panggilan transmisi visual data desk...");
+                // Sisi controller menjawab panggilan host dan menampilkan visual videonya
+                incomingCall.answer();
+                incomingCall.on('stream', (remoteStream) => {
+                    document.getElementById('panel-remote-monitor').classList.remove('d-none');
+                    const videoWidget = document.getElementById('remote-video');
+                    videoWidget.srcObject = remoteStream;
+                    logStatus("Live Mirroring aktif! Menampilkan layar desk target.");
+                });
             });
         }
 
-        function connectManual() {
-            const typedId = document.getElementById('manual-target-id').value.trim();
-            if (!typedId) return alert("Masukkan ID target terlebih dahulu!");
-            
-            syncConnectionUI(false, "Pairing...");
-            logStatus(`Membuka saluran udara lokal ke ID Target PC: ${typedId}...`);
-            
-            p2pConnection = peerInstance.connect(typedId, { reliable: true });
-            bindEngineDataHandlers();
+        // Sisi Host PC mengaktifkan rekam layar browser
+        async function startScreenCapture() {
+            try {
+                localScreenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { cursor: "always" },
+                    audio: false
+                });
+                logStatus("Akses rekam layar diizinkan oleh sistem host.");
+                document.getElementById('start-stream-btn').className = "btn btn-success w-100 fw-bold py-2.5 rounded-3 mb-3";
+                document.getElementById('start-stream-btn').innerText = "Streaming Layar Siap & Aktif";
+            } catch (err) {
+                console.error(err);
+                alert("Gagal mengaktifkan share screen. Izinkan permisi layar terlebih dahulu.");
+            }
         }
 
-        function bindEngineDataHandlers() {
-            const archiveListElement = document.getElementById('file-archive-list');
+        // Sisi Controller Menghubungkan ke Host PC
+        function connectToHost() {
+            const targetHostId = document.getElementById('manual-target-id').value.trim();
+            if (!targetHostId) return alert("Isi ID target Desk PC!");
 
+            logStatus(`Memvalidasi handshake ke Desk Target: ${targetHostId}...`);
+            
+            // 1. Buat jalur data channel untuk koordinat input mouse
+            p2pConnection = peerInstance.connect(targetHostId, { reliable: true });
+            setupDataProtocol();
+
+            // 2. Hubungi target host agar mengirimkan feed visual videonya jika host sudah siap
+            if(localScreenStream) {
+                peerInstance.call(targetHostId, localScreenStream);
+            } else {
+                // Di skema anydesk web, controller meminta stream via data channel
+                setTimeout(() => {
+                    p2pConnection.send({ type: "REQUEST_STREAM" });
+                }, 1000);
+            }
+        }
+
+        function setupDataProtocol() {
             p2pConnection.on('open', () => {
-                syncConnectionUI(true, "Paired & Connected");
-                logStatus("Saluran WebRTC P2P sukses divalidasi. Otoritas pengiriman file dibuka.");
-                if(archiveListElement.innerHTML.includes("Belum ada aktivitas")) {
-                    archiveListElement.innerHTML = "";
-                    archiveListElement.className = "border rounded-4 p-2 bg-white";
+                syncStatusUI(true, "Connected");
+                logStatus("Otoritas kontrol interaksi WebRTC disetujui.");
+                
+                // Daftarkan event tracker mouse di layar controller jika ia adalah pengendali
+                if(currentRole === 'CONTROLLER') {
+                    const videoTrackpad = document.getElementById('remote-video');
+                    videoTrackpad.addEventListener('click', (event) => {
+                        const boundRect = videoTrackpad.getBoundingClientRect();
+                        const xCoordinate = ((event.clientX - boundRect.left) / boundRect.width) * 100;
+                        const yCoordinate = ((event.clientY - boundRect.top) / boundRect.height) * 100;
+                        
+                        // Kirim data koordinat sentuhan (%) ke PC Host target
+                        p2pConnection.send({
+                            type: 'MOUSE_CLICK',
+                            x: xCoordinate.toFixed(2),
+                            y: yCoordinate.toFixed(2)
+                        });
+                        logStatus(`Mengirim Sinyal Klik: X=${xCoordinate.toFixed(1)}%, Y=${yCoordinate.toFixed(1)}%`, true);
+                    });
+                }
+            });
+
+            // Protokol komunikasi penanganan pesan
+            p2pConnection.on('data', (payload) => {
+                if (payload.type === 'REQUEST_STREAM' && currentRole === 'HOST') {
+                    if (localScreenStream) {
+                        logStatus("Menerima permintaan feed layar. Mengirimkan video monitor...");
+                        peerInstance.call(p2pConnection.peer, localScreenStream);
+                    } else {
+                        alert("Controller terhubung, mohon aktifkan tombol 'Sharing Layar PC'!");
+                    }
+                }
+                
+                if (payload.type === 'MOUSE_CLICK' && currentRole === 'HOST') {
+                    // Sisi Host menerima sinyal perintah gerak mouse dari HP Pengendali
+                    logStatus(`[Simulasi Perintah Controller]: Klik di Area X: ${payload.x}%, Y: ${payload.y}%`, true);
+                    // Catatan: Di lingkungan browser sandbox murni, simulasi OS native klik membutuhkan agent native (Electron/Java/Python)
                 }
             });
 
             p2pConnection.on('close', () => {
-                syncConnectionUI(false, "Disconnected");
-                logStatus("🚨 Peringatan: Saluran terputus. Perangkat seberang mematikan aplikasi.");
-            });
-
-            // Engine Receiver Data Stream (Mendukung File Besar via LAN Berkat Stream Chunking)
-            p2pConnection.on('data', (incomingPackage) => {
-                if (incomingPackage.type === 'start') {
-                    receivedDataChunks = [];
-                    totalExpectedBytes = incomingPackage.size;
-                    activeFileName = incomingPackage.name;
-                    activeFileType = incomingPackage.fileType;
-                    logStatus(`Menerima berkas masuk: ${incomingPackage.name} (${(incomingPackage.size/(1024*1024)).toFixed(2)} MB)`);
-                } 
-                else if (incomingPackage.type === 'chunk') {
-                    receivedDataChunks.push(incomingPackage.chunk);
-                    const bytesCalculated = receivedDataChunks.length * 65536; // Perhitungan segmentasi chunk 64KB
-                    const percentProgress = Math.min(100, Math.round((bytesCalculated / totalExpectedBytes) * 100));
-                    logStatus(`Mengunduh paket data stream: ${percentProgress}%`, true);
-                }
-                else if (incomingPackage.type === 'end') {
-                    logStatus(`Merekonstruksi byte data berkas [${activeFileName}]...`);
-                    const finalBlobObject = new Blob(receivedDataChunks, { type: activeFileType });
-                    const blobDownloadUrl = URL.createObjectURL(finalBlobObject);
-                    
-                    triggerBeepSound();
-                    fileCounter++;
-                    document.getElementById('file-count-badge').innerText = `${fileCounter} Files`;
-
-                    let iconClass = "bi-file-earmark-arrow-down-fill text-secondary";
-                    if(activeFileType.includes("image")) iconClass = "bi-file-earmark-image-fill text-primary";
-                    else if(activeFileType.includes("pdf")) iconClass = "bi-file-earmark-pdf-fill text-danger";
-                    else if(activeFileType.includes("video")) iconClass = "bi-file-earmark-play-fill text-warning";
-                    else if(activeFileType.includes("zip") || activeFileType.includes("rar")) iconClass = "bi-file-zip-fill text-info";
-
-                    const visualItemCard = `
-                        <div class="file-card-item d-flex align-items-center justify-content-between text-start">
-                            <div class="d-flex align-items-center gap-3">
-                                <i class="bi ${iconClass} fs-3"></i>
-                                <div style="max-width: 280px;">
-                                    <h6 class="m-0 text-dark text-truncate fw-bold">${activeFileName}</h6>
-                                    <span class="text-muted small">${(totalExpectedBytes / (1024*1024)).toFixed(2)} MB • Selesai</span>
-                                </div>
-                            </div>
-                            <a href="${blobDownloadUrl}" download="${activeFileName}" class="btn btn-sm btn-success px-3 fw-bold rounded-3 shadow-sm">
-                                <i class="bi bi-cloud-arrow-down-fill"></i> Save
-                            </a>
-                        </div>
-                    `;
-                    archiveListElement.innerHTML = visualItemCard + archiveListElement.innerHTML;
-                    logStatus(`Berkas [${activeFileName}] sukses disimpan ke dalam Archive Box.`);
-                }
+                syncStatusUI(false, "Disconnected");
+                logStatus("🚨 Sesi remote dimatikan oleh perangkat seberang.");
             });
         }
 
-        // Fungsi Transmisi Multi-File Berkecepatan Tinggi (LAN Optimized)
-        async function sendMultipleFilesPro() {
-            const htmlFileInput = document.getElementById('file-input');
-            const fileQueue = htmlFileInput.files;
-            if (fileQueue.length === 0) return alert("Tentukan berkas yang ingin dikirim terlebih dahulu!");
-
-            const progressBox = document.getElementById('progress-container');
-            const progressBarElement = document.getElementById('progress-bar');
-            const percentLabel = document.getElementById('progress-percent');
-            const currentStatusLabel = document.getElementById('progress-status');
-            const liveSpeedLabel = document.getElementById('transfer-speed');
-            const liveBytesLabel = document.getElementById('transfer-bytes');
-
-            progressBox.classList.remove('d-none');
-
-            for(let i = 0; i < fileQueue.length; i++) {
-                const currentFile = fileQueue[i];
-                currentStatusLabel.innerText = `Mengirim (${i+1}/${fileQueue.length}): ${currentFile.name}`;
-                
-                // Kirim metadata awal berkas ke penerima
-                p2pConnection.send({ type: 'start', name: currentFile.name, size: currentFile.size, fileType: currentFile.type });
-
-                const customChunkLength = 65536; // Fragmentasi 64 KB per-segmentasi data stream
-                let currentByteOffset = 0;
-                const uploadTimestampStart = Date.now();
-
-                while (currentByteOffset < currentFile.size) {
-                    const dynamicSlice = currentFile.slice(currentByteOffset, currentByteOffset + customChunkLength);
-                    const convertedArrayBuffer = await processSliceToBuffer(dynamicSlice);
-                    
-                    p2pConnection.send({ type: 'chunk', chunk: convertedArrayBuffer });
-                    currentByteOffset += customChunkLength;
-
-                    // Hitung akumulasi statistik progres data transfer
-                    const percentComplete = Math.min(100, Math.round((currentByteOffset / currentFile.size) * 100));
-                    progressBarElement.style.width = percentComplete + "%";
-                    percentLabel.innerText = percentComplete + "%";
-                    
-                    const durationCalculated = (Date.now() - uploadTimestampStart) / 1000;
-                    const mbpsCalculated = ((currentByteOffset / (1024 * 1024)) / (durationCalculated || 1)).toFixed(2);
-                    liveSpeedLabel.innerHTML = `<i class="bi bi-speedometer2"></i> Kecepatan: ${mbpsCalculated} MB/s`;
-                    liveBytesLabel.innerText = `${(currentByteOffset/(1024*1024)).toFixed(1)} / ${(currentFile.size/(1024*1024)).toFixed(1)} MB`;
-
-                    // Memberikan sela istirahat mikro pada CPU agar browser tidak freeze/hang
-                    if(currentByteOffset % (customChunkLength * 35) === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 2));
-                    }
-                }
-
-                // Kirim sinyal penutup data stream berkas
-                p2pConnection.send({ type: 'end' });
-                logStatus(`Sukses mentransfer dokumen: ${currentFile.name}`);
-                await new Promise(resolve => setTimeout(resolve, 400));
-            }
-            currentStatusLabel.innerText = "Seluruh antrean berkas sukses ditransfer!";
-        }
-
-        function processSliceToBuffer(fileSlice) {
-            return new Promise((resolve) => {
-                const chunkFileReader = new FileReader();
-                chunkFileReader.onload = (e) => resolve(e.target.result);
-                chunkFileReader.readAsArrayBuffer(fileSlice);
-            });
-        }
-
-        function syncConnectionUI(isConnected, displayTeks) {
-            const badgeIndicator = document.getElementById('connection-badge');
-            const submitSendBtn = document.getElementById('send-btn');
-            const browserFileInput = document.getElementById('file-input');
-            const triggeringKonekBtn = document.getElementById('connect-btn');
-
-            if (isConnected) {
-                badgeIndicator.className = "badge bg-success status-badge text-white";
-                badgeIndicator.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${displayTeks}`;
-                
-                if (currentRole === 'SENDER') {
-                    submitSendBtn.disabled = false;
-                    browserFileInput.disabled = false;
-                    submitSendBtn.className = "btn btn-success w-100 py-2.5 shadow-sm fw-bold rounded-3";
-                    submitSendBtn.innerHTML = `<i class="bi bi-send-fill me-2"></i> Mulai Pengiriman Berkas`;
-                }
-                if(triggeringKonekBtn) {
-                    triggeringKonekBtn.innerText = "Paired";
-                    triggeringKonekBtn.disabled = true;
-                }
-            } else if (displayTeks === "Pairing...") {
-                badgeIndicator.className = "badge bg-warning status-badge text-dark";
-                badgeIndicator.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Pairing Jalur...`;
+        function syncStatusUI(connected, text) {
+            const indicator = document.getElementById('status-indicator');
+            if(connected) {
+                indicator.className = "badge bg-success status-badge text-white";
+                indicator.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> ${text}`;
             } else {
-                badgeIndicator.className = "badge bg-danger status-badge text-white";
-                badgeIndicator.innerHTML = `<i class="bi bi-bluetooth me-1"></i> ${displayTeks}`;
-                
-                submitSendBtn.disabled = true;
-                browserFileInput.disabled = true;
-                submitSendBtn.className = "btn btn-secondary w-100 py-2.5 shadow-sm fw-bold rounded-3";
-                submitSendBtn.innerHTML = `<i class="bi bi-lock-fill me-2"></i> Pasangkan Perangkat Terlebih Dahulu`;
-                if(triggeringKonekBtn) {
-                    triggeringKonekBtn.innerText = "Konek";
-                    triggeringKonekBtn.disabled = false;
-                }
+                indicator.className = "badge bg-danger status-badge text-white";
+                indicator.innerHTML = `<i class="bi bi-broadcast me-1"></i> ${text}`;
             }
         }
 
         function toggleCameraScanner() {
-            const videoPreviewElement = document.getElementById('camera-preview');
-            const triggeringScanBtn = document.getElementById('camera-btn');
-            
+            const preview = document.getElementById('camera-preview');
+            const btn = document.getElementById('camera-btn');
             if (isScannerActive) {
                 qrScannerReader.reset();
-                videoPreviewElement.style.display = 'none';
-                triggeringScanBtn.innerHTML = `<i class="bi bi-qr-code-scan me-2"></i> Aktifkan Scanner Kamera HP`;
+                preview.style.display = 'none';
+                btn.innerHTML = `<i class="bi bi-qr-code-scan me-2"></i> Scan QR Code Layar PC`;
                 isScannerActive = false;
                 return;
             }
-
             isScannerActive = true;
-            videoPreviewElement.style.display = 'block';
+            preview.style.display = 'block';
             qrScannerReader = new ZXing.BrowserQRCodeReader();
-            
-            qrScannerReader.decodeFromVideoDevice(null, 'camera-preview', (scanResult, scanErr) => {
-                if (scanResult) {
+            qrScannerReader.decodeFromVideoDevice(null, 'camera-preview', (result) => {
+                if (result) {
                     qrScannerReader.reset();
-                    videoPreviewElement.style.display = 'none';
-                    triggeringScanBtn.innerHTML = `<i class="bi bi-qr-code-scan me-2"></i> Aktifkan Scanner Kamera HP`;
+                    preview.style.display = 'none';
+                    btn.innerHTML = `<i class="bi bi-qr-code-scan me-2"></i> Scan QR Code Layar PC`;
                     isScannerActive = false;
-                    
-                    // Ekstraksi parameter ID dari string URL hasil scan QR Code
-                    const convertedUrlObject = new URL(scanResult.text);
-                    const extractedIdParam = convertedUrlObject.searchParams.get('pair');
-                    if (extractedIdParam) {
-                        document.getElementById('manual-target-id').value = extractedIdParam;
-                        connectManual();
+                    const url = new URL(result.text);
+                    const pairId = url.searchParams.get('pair');
+                    if (pairId) {
+                        document.getElementById('manual-target-id').value = pairId;
+                        connectToHost();
                     }
                 }
             });
-            triggeringScanBtn.className = "btn btn-danger w-100 fw-bold py-2.5 rounded-3 mb-2";
-            triggeringScanBtn.innerHTML = `<i class="bi bi-camera-video-off-fill me-2"></i> Matikan Scanner Kamera`;
-        }
-
-        function triggerBeepSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const soundOscillator = audioCtx.createOscillator();
-                const soundGainNode = audioCtx.createGain();
-                soundOscillator.connect(soundGainNode);
-                soundGainNode.connect(audioCtx.destination);
-                soundOscillator.type = 'sine';
-                soundOscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
-                soundOscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); 
-                soundGainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                soundGainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-                soundOscillator.start(audioCtx.currentTime);
-                soundOscillator.stop(audioCtx.currentTime + 0.4);
-            } catch(e){}
         }
 
         function logStatus(msg, isReplaceLast = false) {
-            const terminalLogBox = document.getElementById('status-log');
-            if(isReplaceLast && terminalLogBox.lastChild) {
-                terminalLogBox.removeChild(terminalLogBox.lastChild);
-            }
-            terminalLogBox.innerHTML += `<div>> ${msg}</div>`;
-            terminalLogBox.scrollTop = terminalLogBox.scrollHeight;
-        }
-
-        function copyMyId() {
-            const activeIdString = document.getElementById('my-id').innerText;
-            if(activeIdString && activeIdString !== 'Loading...') {
-                navigator.clipboard.writeText(activeIdString);
-                alert("ID Perangkat Pro Berhasil Disalin: " + activeIdString);
-            }
+            const logBox = document.getElementById('status-log');
+            if(isReplaceLast && logBox.lastChild) logBox.removeChild(logBox.lastChild);
+            logBox.innerHTML += `<div>> ${msg}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
         }
     </script>
 </body>
