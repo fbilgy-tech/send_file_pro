@@ -3,183 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FileBridge Pro - P2P Internet Transfer</title>
+    <title>FileBridge Pro - Premium P2P Transfer</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #0b0f19; color: #e2e8f0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        .app-container { max-width: 600px; margin: 50px auto; }
-        .card-custom { background: #111827; border: 1px solid #1f2937; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
-        .accent-text { color: #38bdf8; }
-        .status-box { background-color: #030712; border: 1px solid #1f2937; height: 120px; overflow-y: auto; font-family: monospace; }
-        .file-card { background: #1f2937; border: 1px solid #374151; border-radius: 10px; padding: 15px; }
+        body { background-color: #f3f4f6; color: #1f2937; font-family: 'Segoe UI', system-ui, sans-serif; }
+        .app-container { max-width: 650px; margin: 40px auto; }
+        .card-custom { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.04); }
+        .accent-bg { background-color: #f0fdf4; border: 1px solid #bbf7d0; }
+        .accent-text { color: #16a34a; }
+        .status-box { background-color: #f9fafb; border: 1px solid #e5e7eb; height: 110px; overflow-y: auto; font-family: monospace; color: #4b5563; }
+        .file-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; transition: all 0.2s; }
+        .file-item:hover { border-color: #16a34a; background: #f0fdf4; }
+        .btn-premium { background-color: #16a34a; color: white; font-weight: 600; border-radius: 10px; }
+        .btn-premium:hover { background-color: #15803d; color: white; }
     </style>
 </head>
 <body>
 
     <div class="container app-container p-3">
-        <div class="card card-custom p-4">
+        <div class="card card-custom p-4 p-md-5">
             <div class="text-center mb-4">
-                <h2 class="fw-bold m-0">FileBridge <span class="accent-text">Pro</span></h2>
-                <p class="text-muted small">Beda Jaringan • Tanpa Bluetooth • Enkripsi P2P</p>
+                <div class="d-inline-block p-3 bg-success bg-opacity-10 rounded-circle mb-2">
+                    <i class="bi bi-cloud-arrow-up-fill text-success fs-2"></i>
+                </div>
+                <h2 class="fw-bold m-0 text-dark">FileBridge <span class="accent-text">Pro</span></h2>
+                <p class="text-muted small">Premium Light Theme • Lintas Internet • P2P Enkripsi</p>
             </div>
 
-            <div class="p-3 bg-dark rounded-3 text-center mb-4 border border-secondary">
-                <span class="text-muted small d-block mb-1">ID Perangkat Anda:</span>
-                <h4 id="my-id" class="accent-text fw-bold m-0"><span class="spinner-border spinner-border-sm"></span> Menghubungkan...</h4>
+            <div class="p-3 accent-bg rounded-4 text-center mb-4">
+                <span class="text-muted small d-block mb-1 fw-semibold">ID PERANGKAT ANDA</span>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <h3 id="my-id" class="accent-text fw-bold m-0 letter-spacing-1">Connecting...</h3>
+                    <button class="btn btn-sm btn-outline-success border-0 py-0" onclick="copyMyId()" title="Salin ID"><i class="bi bi-copy"></i></button>
+                </div>
             </div>
 
             <div class="mb-4">
-                <label class="form-label small text-muted fw-bold">Hubungkan ke PC Target:</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-secondary text-white border-secondary"><i class="bi bi-laptop"></i></span>
-                    <input type="text" id="target-id" class="form-control bg-dark text-white border-secondary" placeholder="Masukkan ID PC Target...">
-                    <button class="btn btn-primary fw-bold" onclick="connectToPeer()">Hubungkan</button>
+                <label class="form-label small text-secondary fw-bold">Hubungkan ke Perangkat Tujuan:</label>
+                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-link-45deg"></i></span>
+                    <input type="text" id="target-id" class="form-control border-start-0 py-2" placeholder="Masukkan ID Target...">
+                    <button class="btn btn-premium px-4" onclick="connectToPeer()">Hubungkan</button>
                 </div>
             </div>
 
-            <div id="action-area" class="d-none border-top border-secondary pt-3">
+            <div id="action-area" class="d-none border-top pt-4">
                 <div class="mb-4">
-                    <label class="form-label small text-muted fw-bold">Pilih File untuk Dikirim:</label>
-                    <input type="file" id="file-input" class="form-control bg-dark text-white border-secondary mb-2">
-                    <button class="btn btn-info w-100 fw-bold text-dark" onclick="sendFile()">
-                        <i class="bi bi-send-fill me-1"></i> Kirim File via Internet
+                    <label class="form-label small text-secondary fw-bold">Kirim File (Bisa Pilih Banyak):</label>
+                    <input type="file" id="file-input" class="form-control mb-2" multiple>
+                    <button class="btn btn-premium w-100 py-2.5 shadow-sm" onclick="sendMultipleFiles()">
+                        <i class="bi bi-send-fill me-2"></i> Mulai Transfer File
                     </button>
                 </div>
 
-                <div id="progress-container" class="mb-3 d-none">
-                    <div class="d-flex justify-content-between small text-muted mb-1">
-                        <span id="progress-status">Mengirim...</span>
-                        <span id="progress-percent">0%</span>
+                <div id="progress-container" class="mb-4 d-none p-3 bg-light rounded-3 border">
+                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                        <span id="progress-status" class="text-dark">Mengirim...</span>
+                        <span id="progress-percent" class="accent-text">0%</span>
                     </div>
-                    <div class="progress bg-dark" style="height: 10px;">
-                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 0%"></div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div id="progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted x-small" style="font-size: 11px;">
+                        <span id="transfer-speed"><i class="bi bi-speedometer2"></i> 0 MB/s</span>
+                        <span id="transfer-eta"><i class="bi bi-clock"></i> Sisa Waktu: --</span>
                     </div>
                 </div>
 
-                <div id="incoming-file-box" class="mb-3 d-none">
-                    <label class="form-label small text-warning fw-bold"><i class="bi bi-download"></i> File Masuk Terdeteksi:</label>
-                    <div class="file-card d-flex align-items-center justify-content-between">
-                        <div>
-                            <h6 id="incoming-name" class="m-0 text-truncate" style="max-width: 250px;">nama_file.ext</h6>
-                            <span id="incoming-size" class="text-muted small">0 KB</span>
-                        </div>
-                        <a id="download-btn" class="btn btn-success fw-bold btn-sm">
-                            <i class="bi bi-cloud-arrow-down-fill"></i> Download
-                        </a>
+                <div class="mb-4">
+                    <label class="form-label small text-secondary fw-bold d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-folder2-open me-1"></i> Daftar Berkas Ditransfer:</span>
+                        <span id="file-count" class="badge bg-secondary">0 Berkas</span>
+                    </label>
+                    <div id="file-manager-list" style="max-height: 220px; overflow-y: auto;" class="border rounded-3 p-2 bg-light text-center text-muted small py-4">
+                        <i class="bi bi-inbox fs-3 d-block mb-1 text-black-50"></i> Belum ada file yang ditransfer
                     </div>
                 </div>
             </div>
 
-            <label class="form-label small text-muted fw-bold">Aktivitas Sistem:</label>
-            <div id="status-log" class="status-box p-2 rounded text-info small">
-                <div>> Sistem diinisialisasi. Menunggu server...</div>
+            <label class="form-label small text-secondary fw-bold">Log Aktivitas:</label>
+            <div id="status-log" class="status-box p-2 rounded-3 small shadow-inner">
+                <div>> Sistem siap. Menghubungkan ke server PeerJS...</div>
             </div>
         </div>
     </div>
+
+    <script>
+        function playSuccessSound() {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = context.createOscillator();
+            const gain = context.createGain();
+            osc.connect(gain);
+            gain.connect(context.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, context.currentTime); // D5 note
+            osc.frequency.setValueAtTime(880, context.currentTime + 0.1); // A5 note
+            gain.gain.setValueAtTime(0.1, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.4);
+            osc.start(context.currentTime);
+            osc.stop(context.currentTime + 0.4);
+        }
+    </script>
 
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script>
         /**
          * @file index.html
-         * @description Aplikasi P2P File Transfer lintas jaringan via Internet
+         * @description Aplikasi P2P File Transfer Lintas Jaringan (Premium White Theme)
          * @author Desnabil Gymnastiar <Biel07.Dev>
          * @copyright © 2026 Desnabil Gymnastiar. All rights reserved.
          */
         const randomId = Math.random().toString(36).substring(2, 7);
         const peer = new Peer(randomId);
         let conn = null;
+        let fileCounter = 0;
 
         peer.on('open', (id) => {
             document.getElementById('my-id').innerText = id;
-            logStatus("Berhasil terhubung ke jaringan internet global. Siap beraksi.");
+            logStatus("Terhubung ke server signaling global. Sistem siap digunakan.");
         });
 
         peer.on('connection', (connection) => {
             conn = connection;
             setupHandlers();
-            logStatus("Ada perangkat HP yang terhubung ke PC ini!");
+            logStatus("Koneksi masuk terdeteksi dari perangkat HP!");
         });
+
+        function copyMyId() {
+            const idText = document.getElementById('my-id').innerText;
+            if(idText && idText !== 'Connecting...') {
+                navigator.clipboard.writeText(idText);
+                alert("ID Perangkat berhasil disalin: " + idText);
+            }
+        }
 
         function connectToPeer() {
             const targetId = document.getElementById('target-id').value.trim();
             if (!targetId) return alert("Masukkan ID target terlebih dahulu!");
             
-            logStatus(`Mencoba tersambung ke ID: ${targetId}...`);
+            logStatus(`Menghubungkan ke ID: ${targetId}...`);
             conn = peer.connect(targetId);
             setupHandlers();
         }
 
         function setupHandlers() {
             document.getElementById('action-area').classList.remove('d-none');
+            const managerList = document.getElementById('file-manager-list');
 
             conn.on('open', () => {
-                logStatus("Jalur P2P Aman Terbuka! Anda sekarang bisa bertukar file.");
+                logStatus("Jalur P2P Aman Berhasil Dibuka!");
+                if(managerList.innerHTML.includes("Belum ada file")) {
+                    managerList.innerHTML = "";
+                    managerList.className = "border rounded-3 p-2 bg-white";
+                }
             });
 
+            // Menangani penerimaan file interaktif (Sisi Penerima / PC)
             conn.on('data', (data) => {
                 if (data.type === 'start') {
-                    document.getElementById('incoming-file-box').classList.add('d-none');
-                    logStatus(`Menerima informasi file: ${data.name}`);
+                    logStatus(`Sedang menerima informasi file: ${data.name}`);
                 } 
                 else if (data.type === 'complete') {
-                    logStatus(`File [${data.name}] siap diunduh.`);
+                    playSuccessSound();
+                    logStatus(`Berkas [${data.name}] sukses diterima.`);
+                    
                     const blob = new Blob([data.file], { type: data.fileType });
-                    const downloadBtn = document.getElementById('download-btn');
+                    const blobUrl = URL.createObjectURL(blob);
                     
-                    document.getElementById('incoming-name').innerText = data.name;
-                    document.getElementById('incoming-size').innerText = `${(data.size / (1024*1024)).toFixed(2)} MB`;
-                    
-                    downloadBtn.href = URL.createObjectURL(blob);
-                    downloadBtn.download = data.name;
-                    document.getElementById('incoming-file-box').classList.remove('d-none');
+                    fileCounter++;
+                    document.getElementById('file-count').innerText = `${fileCounter} Berkas`;
+
+                    // Menentukan ikon file yang cocok
+                    let fileIcon = "bi-file-earmark-code";
+                    if(data.fileType.includes("image")) fileIcon = "bi-file-earmark-image text-primary";
+                    else if(data.fileType.includes("pdf")) fileIcon = "bi-file-earmark-pdf text-danger";
+                    else if(data.fileType.includes("video")) fileIcon = "bi-file-earmark-play text-warning";
+                    else if(data.fileType.includes("zip") || data.fileType.includes("rar")) fileIcon = "bi-file-zip text-info";
+
+                    const itemHtml = `
+                        <div class="file-item d-flex align-items-center justify-content-between text-start">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi ${fileIcon} fs-3"></i>
+                                <div style="max-width: 280px;">
+                                    <h6 class="m-0 text-dark text-truncate fw-semibold">${data.name}</h6>
+                                    <span class="text-muted small">${(data.size / (1024*1024)).toFixed(2)} MB • Selesai</span>
+                                </div>
+                            </div>
+                            <a href="${blobUrl}" download="${data.name}" class="btn btn-sm btn-success px-3 fw-bold rounded-3">
+                                <i class="bi bi-download"></i> Download
+                            </a>
+                        </div>
+                    `;
+                    managerList.innerHTML = itemHtml + managerList.innerHTML;
                 }
             });
         }
 
-        function sendFile() {
+        // Fungsi Mengirim Banyak File Sekaligus (Sisi HP)
+        async function sendMultipleFiles() {
             const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
-            if (!file) return alert("Pilih filenya dulu bos!");
+            const files = fileInput.files;
+            if (files.length === 0) return alert("Pilih minimal satu file terlebih dahulu!");
+            if (!conn) return alert("Perangkat belum terhubung!");
 
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const progressPercent = document.getElementById('progress-percent');
-            const progressStatus = document.getElementById('progress-status');
+            const container = document.getElementById('progress-container');
+            const bar = document.getElementById('progress-bar');
+            const percent = document.getElementById('progress-percent');
+            const status = document.getElementById('progress-status');
+            const speedEl = document.getElementById('transfer-speed');
 
-            progressContainer.classList.remove('d-none');
-            progressStatus.innerText = "Membaca file...";
-            progressBar.style.width = "0%";
-            progressPercent.innerText = "0%";
+            container.classList.remove('d-none');
 
-            const reader = new FileReader();
-            conn.send({ type: 'start', name: file.name });
+            for(let i=0; i<files.length; i++) {
+                const file = files[i];
+                status.innerText = `Mengirim (${i+1}/${files.length}): ${file.name}`;
+                
+                // Kirim sinyal start
+                conn.send({ type: 'start', name: file.name });
 
-            reader.onprogress = function(data) {
-                if (data.lengthComputable) {
-                    const progress = parseInt(((data.loaded / data.total) * 100), 10);
-                    progressBar.style.width = progress + "%";
-                    progressPercent.innerText = progress + "%";
-                    progressStatus.innerText = "Mengirim data ke PC...";
-                }
-            };
+                const startTime = Date.now();
+                const fileData = await readFileAsArrayBuffer(file);
 
-            reader.onload = function(e) {
-                logStatus(`Mengirim file: ${file.name}`);
+                // Kirim data lengkap ke PC
                 conn.send({
                     type: 'complete',
-                    file: e.target.result,
+                    file: fileData,
                     name: file.name,
                     fileType: file.type,
                     size: file.size
                 });
-                progressStatus.innerText = "Selesai Terkirim!";
-                progressBar.style.width = "100%";
-                progressPercent.innerText = "100%";
-                logStatus("File sukses dikirim ke PC target!");
-            };
 
-            reader.readAsArrayBuffer(file);
+                // Update UI Selesai untuk file ini
+                const duration = (Date.now() - startTime) / 1000;
+                const speed = ((file.size / (1024 * 1024)) / (duration || 1)).toFixed(2);
+                speedEl.innerHTML = `<i class="bi bi-speedometer2"></i> Kecepatan: ${speed} MB/s`;
+
+                bar.style.width = "100%";
+                percent.innerText = "100%";
+                logStatus(`Sukses mengirim: ${file.name}`);
+
+                // Beri jeda singkat antar file agar buffer lancar
+                await new Promise(resolve => setTimeout(resolve, 600));
+            }
+
+            status.innerText = "Semua file berhasil terkirim!";
+            document.getElementById('transfer-eta').innerHTML = `<i class="bi bi-check-circle-fill text-success"></i> Selesai`;
+        }
+
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsArrayBuffer(file);
+            });
         }
 
         function logStatus(msg) {
