@@ -17,6 +17,7 @@
         .file-item:hover { border-color: #16a34a; background: #f0fdf4; }
         .btn-premium { background-color: #16a34a; color: white; font-weight: 600; border-radius: 10px; }
         .btn-premium:hover { background-color: #15803d; color: white; }
+        .badge-status { font-size: 13px; padding: 6px 12px; border-radius: 30px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -31,9 +32,14 @@
                 <p class="text-muted small">Premium Light Theme • Lintas Internet • P2P Enkripsi</p>
             </div>
 
-            <div class="p-3 accent-bg rounded-4 text-center mb-4">
-                <span class="text-muted small d-block mb-1 fw-semibold">ID PERANGKAT ANDA</span>
-                <div class="d-flex align-items-center justify-content-center gap-2">
+            <div class="p-3 accent-bg rounded-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2 border-success border-opacity-10">
+                    <span class="text-muted small fw-bold">ID PERANGKAT ANDA</span>
+                    <span id="connection-badge" class="badge bg-danger badge-status text-white">
+                        <i class="bi bi-wifi-off me-1"></i> Belum Terhubung
+                    </span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-2 py-1">
                     <h3 id="my-id" class="accent-text fw-bold m-0 letter-spacing-1">Connecting...</h3>
                     <button class="btn btn-sm btn-outline-success border-0 py-0" onclick="copyMyId()" title="Salin ID"><i class="bi bi-copy"></i></button>
                 </div>
@@ -44,16 +50,16 @@
                 <div class="input-group shadow-sm rounded-3 overflow-hidden">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-link-45deg"></i></span>
                     <input type="text" id="target-id" class="form-control border-start-0 py-2" placeholder="Masukkan ID Target...">
-                    <button class="btn btn-premium px-4" onclick="connectToPeer()">Hubungkan</button>
+                    <button id="connect-btn" class="btn btn-premium px-4" onclick="connectToPeer()">Hubungkan</button>
                 </div>
             </div>
 
-            <div id="action-area" class="d-none border-top pt-4">
+            <div id="action-area" class="border-top pt-4">
                 <div class="mb-4">
                     <label class="form-label small text-secondary fw-bold">Kirim File (Bisa Pilih Banyak):</label>
-                    <input type="file" id="file-input" class="form-control mb-2" multiple>
-                    <button class="btn btn-premium w-100 py-2.5 shadow-sm" onclick="sendMultipleFiles()">
-                        <i class="bi bi-send-fill me-2"></i> Mulai Transfer File
+                    <input type="file" id="file-input" class="form-control mb-2" multiple disabled>
+                    <button id="send-btn" class="btn btn-secondary w-100 py-2.5 shadow-sm fw-bold" onclick="sendMultipleFiles()" disabled>
+                        <i class="bi bi-send-slash-fill me-2"></i> Pastikan Koneksi Terhubung Dahulu
                     </button>
                 </div>
 
@@ -97,8 +103,8 @@
             osc.connect(gain);
             gain.connect(context.destination);
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(587.33, context.currentTime); // D5 note
-            osc.frequency.setValueAtTime(880, context.currentTime + 0.1); // A5 note
+            osc.frequency.setValueAtTime(587.33, context.currentTime); 
+            osc.frequency.setValueAtTime(880, context.currentTime + 0.1); 
             gain.gain.setValueAtTime(0.1, context.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.4);
             osc.start(context.currentTime);
@@ -110,7 +116,7 @@
     <script>
         /**
          * @file index.html
-         * @description Aplikasi P2P File Transfer Lintas Jaringan (Premium White Theme)
+         * @description P2P File Transfer dengan Fitur Proteksi & Validasi Sinyal Koneksi Internet
          * @author Desnabil Gymnastiar <Biel07.Dev>
          * @copyright © 2026 Desnabil Gymnastiar. All rights reserved.
          */
@@ -121,13 +127,15 @@
 
         peer.on('open', (id) => {
             document.getElementById('my-id').innerText = id;
-            logStatus("Terhubung ke server signaling global. Sistem siap digunakan.");
+            logStatus("Terhubung ke server signaling global. Menunggu inisiasi tautan antar-perangkat.");
         });
 
+        // Menangani Koneksi Masuk (Sisi Penerima / PC)
         peer.on('connection', (connection) => {
             conn = connection;
             setupHandlers();
-            logStatus("Koneksi masuk terdeteksi dari perangkat HP!");
+            updateConnectionUI(true, "Terhubung (Sebagai PC/Penerima)");
+            logStatus("Handshake berhasil! Koneksi P2P internet dengan HP telah tervalidasi aktif.");
         });
 
         function copyMyId() {
@@ -138,28 +146,75 @@
             }
         }
 
+        // Menghubungkan ke Perangkat Lain (Sisi Pengirim / HP)
         function connectToPeer() {
             const targetId = document.getElementById('target-id').value.trim();
             if (!targetId) return alert("Masukkan ID target terlebih dahulu!");
             
-            logStatus(`Menghubungkan ke ID: ${targetId}...`);
+            updateConnectionUI(false, "Menghubungkan...");
+            logStatus(`Mencoba melakukan sinkronisasi sinyal ke ID: ${targetId}...`);
+            
             conn = peer.connect(targetId);
             setupHandlers();
         }
 
+        function updateConnectionUI(isConnected, text) {
+            const badge = document.getElementById('connection-badge');
+            const sendBtn = document.getElementById('send-btn');
+            const fileInput = document.getElementById('file-input');
+            const connectBtn = document.getElementById('connect-btn');
+
+            if (isConnected) {
+                badge.className = "badge bg-success badge-status text-white";
+                badge.innerHTML = `<i class="bi bi-wifi me-1"></i> ${text}`;
+                
+                // Buka proteksi tombol kirim file
+                sendBtn.disabled = false;
+                fileInput.disabled = false;
+                sendBtn.className = "btn btn-premium w-100 py-2.5 shadow-sm fw-bold";
+                sendBtn.innerHTML = `<i class="bi bi-send-fill me-2"></i> Mulai Transfer File`;
+                connectBtn.innerText = "Terhubung";
+                connectBtn.disabled = true;
+            } else if (text === "Menghubungkan...") {
+                badge.className = "badge bg-warning badge-status text-dark";
+                badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Sinkronisasi Jalur...`;
+            } else {
+                badge.className = "badge bg-danger badge-status text-white";
+                badge.innerHTML = `<i class="bi bi-wifi-off me-1"></i> ${text}`;
+                
+                // Kunci proteksi tombol kirim file
+                sendBtn.disabled = true;
+                fileInput.disabled = true;
+                sendBtn.className = "btn btn-secondary w-100 py-2.5 shadow-sm fw-bold";
+                sendBtn.innerHTML = `<i class="bi bi-send-slash-fill me-2"></i> Pastikan Koneksi Terhubung Dahulu`;
+                connectBtn.innerText = "Hubungkan";
+                connectBtn.disabled = false;
+            }
+        }
+
         function setupHandlers() {
-            document.getElementById('action-area').classList.remove('d-none');
             const managerList = document.getElementById('file-manager-list');
 
             conn.on('open', () => {
-                logStatus("Jalur P2P Aman Berhasil Dibuka!");
+                updateConnectionUI(true, "Terhubung (Sebagai HP/Pengirim)");
+                logStatus("Jalur P2P Aman Berhasil Terverifikasi Aktif! Siap kirim berkas.");
                 if(managerList.innerHTML.includes("Belum ada file")) {
                     managerList.innerHTML = "";
                     managerList.className = "border rounded-3 p-2 bg-white";
                 }
             });
 
-            // Menangani penerimaan file interaktif (Sisi Penerima / PC)
+            conn.on('close', () => {
+                updateConnectionUI(false, "Koneksi Terputus");
+                logStatus("🚨 Peringatan: Jalur komunikasi terputus dari perangkat seberang.");
+            });
+
+            conn.on('error', (err) => {
+                updateConnectionUI(false, "Gagal");
+                logStatus(`🚨 Error Koneksi: ${err.message}`);
+            });
+
+            // Menangani penerimaan file
             conn.on('data', (data) => {
                 if (data.type === 'start') {
                     logStatus(`Sedang menerima informasi file: ${data.name}`);
@@ -174,7 +229,6 @@
                     fileCounter++;
                     document.getElementById('file-count').innerText = `${fileCounter} Berkas`;
 
-                    // Menentukan ikon file yang cocok
                     let fileIcon = "bi-file-earmark-code";
                     if(data.fileType.includes("image")) fileIcon = "bi-file-earmark-image text-primary";
                     else if(data.fileType.includes("pdf")) fileIcon = "bi-file-earmark-pdf text-danger";
@@ -200,12 +254,15 @@
             });
         }
 
-        // Fungsi Mengirim Banyak File Sekaligus (Sisi HP)
+        // Fungsi Mengirim Banyak File Sekaligus
         async function sendMultipleFiles() {
             const fileInput = document.getElementById('file-input');
             const files = fileInput.files;
             if (files.length === 0) return alert("Pilih minimal satu file terlebih dahulu!");
-            if (!conn) return alert("Perangkat belum terhubung!");
+            if (!conn || conn.open === false) {
+                updateConnectionUI(false, "Belum Terhubung");
+                return alert("Koneksi belum terverifikasi! Silakan klik Hubungkan ulang.");
+            }
 
             const container = document.getElementById('progress-container');
             const bar = document.getElementById('progress-bar');
@@ -219,13 +276,11 @@
                 const file = files[i];
                 status.innerText = `Mengirim (${i+1}/${files.length}): ${file.name}`;
                 
-                // Kirim sinyal start
                 conn.send({ type: 'start', name: file.name });
 
                 const startTime = Date.now();
                 const fileData = await readFileAsArrayBuffer(file);
 
-                // Kirim data lengkap ke PC
                 conn.send({
                     type: 'complete',
                     file: fileData,
@@ -234,7 +289,6 @@
                     size: file.size
                 });
 
-                // Update UI Selesai untuk file ini
                 const duration = (Date.now() - startTime) / 1000;
                 const speed = ((file.size / (1024 * 1024)) / (duration || 1)).toFixed(2);
                 speedEl.innerHTML = `<i class="bi bi-speedometer2"></i> Kecepatan: ${speed} MB/s`;
@@ -243,7 +297,6 @@
                 percent.innerText = "100%";
                 logStatus(`Sukses mengirim: ${file.name}`);
 
-                // Beri jeda singkat antar file agar buffer lancar
                 await new Promise(resolve => setTimeout(resolve, 600));
             }
 
